@@ -1,7 +1,26 @@
+# Ignore large files
+*.tar.gz
+*patches*
+*img_align_celeba*
+celebAdata/img_align_celeba/
+
+# Include files
+!experiments/CelebA/vanilla_ResNet_debug
+
+# Personal files
+manuka/
+
+# Experiments
+runs/
+*.pth
+wandb/
+experiments/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+.DS_Store
 
 # C extensions
 *.so
