@@ -97,6 +97,17 @@ def data_stats():
     print("hospitals_train: ", hospitals_train)
     print("hospitals_test: ", hospitals_test)
 
+def fmow_data_stats(filename):
+    print("\nfilename: ", filename)
+    df = pd.read_csv(filename)
+    print(df.head())
+    years = sorted(df["year"].unique())
+    regions = sorted(df["region"].unique())
+    classes = sorted(df["y"].unique())
+    print("Unique years: ", years)
+    print("Unique regions: ", regions)
+    print("Num unique classes: ", len(classes))
+
 def create_new_splits():
     meta_filename = "data/camelyon17_v1.0/metadata.csv"
     df = pd.read_csv(meta_filename)
@@ -121,13 +132,13 @@ def create_new_splits():
     df_val_distribution.to_csv("data/camelyon17_v1.0/wilds_splits/metadata_valid.csv", index=False)
     df_test_distribution.to_csv("data/camelyon17_v1.0/wilds_splits/metadata_test.csv", index=False)
 
-def get_debug_dataset():
-    meta_filename = "data/CelebA/splits/setting1_train.csv"
+def get_debug_dataset_fmow():
+    meta_filename = "data/fmow_v1.1/val.csv"
     df = pd.read_csv(meta_filename)
-    df = df.sample(n=50)
+    df = df.sample(n=30)
     df = df.reset_index(drop=True)
-    df.to_csv("data/CelebA/splits/debug_setting1_train.csv", index=False)
-
+    print(df)
+    df.to_csv("data/fmow_v1.1/debug_val.csv", index=False)
 
 
 def split_debug_into_two_files():

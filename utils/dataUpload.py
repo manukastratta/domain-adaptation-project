@@ -3,7 +3,12 @@ from google.cloud import storage
 import fire
 import multiprocessing as mp
 from multiprocessing import Pool, cpu_count
+import pandas as pd
 
+def dowload_fmow_debug():
+    df = pd.read_csv("data/fmow_v1.1/debug_train.csv")
+    filenames = list(df["img_path"])
+    print(filenames)
 
 def upload_cameylon():
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/manukastratta/Developer/CS329D/test-time-training-project/manuka/cs329d-project-385522-888630fdc09e.json"

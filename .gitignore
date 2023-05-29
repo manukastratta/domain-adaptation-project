@@ -3,6 +3,7 @@
 *patches*
 *img_align_celeba*
 celebAdata/img_align_celeba/
+*original*
 
 # Include files
 !experiments/CelebA/vanilla_ResNet_debug
