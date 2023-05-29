@@ -79,6 +79,40 @@ class CelebADataset(Dataset):
 
         return image_tensor, label_tensor, metadata
 
+class FMoWDataset(Dataset):
+    def __init__(self, metadata_file, image_dir, transform=None):
+        self.metadata = pd.read_csv(image_dir + "/" + metadata_file)
+        self.image_dir = image_dir
+        self.transform = transform
+        self.n_channels = 3
+        self.img_width = 224
+        self.img_height = 224
+
+    def __len__(self):
+        return len(self.metadata)
+
+    def __getitem__(self, idx):
+        image_path = os.path.join(self.image_dir, "images/" + self.metadata.iloc[idx]['new_filename'])
+        image = Image.open(image_path)
+
+        if self.transform:
+            image = self.transform(image)
+        
+        image_np = np.array(image) # (3, 218, 178)
+        image_tensor = to_tensor(image_np)
+        image_tensor = image_tensor.reshape((self.n_channels, self.img_height, self.img_width))
+
+        filename = self.metadata.iloc[idx][['new_filename']].item()
+        year = self.metadata.iloc[idx][['year']].item()
+        metadata = dict({"new_filename": filename, "year": year})
+        #metadata_tensor = torch.Tensor(metadata.values)
+
+        label = self.metadata.iloc[idx][['y']]
+        label_tensor = torch.Tensor(label.values.astype(np.int32))
+
+        return image_tensor, label_tensor, metadata
+
+
 # def display_image(image_array):
 #     pil_image = to_pil_image(image_array)
 #     image = Image.fromarray(np.uint8(pil_image))
@@ -169,6 +203,28 @@ def get_celeba_data_loader(data_dir, metadata_filename, batch_size=32, transform
     # print(image.shape)  # torch.Size([32, 3, 218, 178])
     # print(label.shape)  # torch.Size([32, 1])
     # single_image = image[4, :, :, :]
+    # display_image(single_image)
+
+    return dataloader
+
+
+def get_fmow_data_loader(data_dir, metadata_filename, batch_size=32, transform=None, num_cpus=multiprocessing.cpu_count()):
+    """
+    Takes in the meta csv filename, returns dataloader
+    Can be used for train, val, or test metadata
+    """
+    transform = None # Experiments showed that no normalization is best
+    dataset = FMoWDataset(metadata_file=metadata_filename, image_dir=data_dir, transform=transform)
+    # TODO change back to shuffle True
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_cpus, persistent_workers=True)
+
+    # # Testing dataloader
+    # sample = next(iter(dataloader))
+    # image, label, metadata = sample # torch.Size([32, 3, 96, 96]), torch.Size([32, 1]), torch.Size([32, 7])
+
+    # print(image.shape)  # torch.Size([32, 3, 218, 178])
+    # print(label.shape)  # torch.Size([32, 1])
+    # single_image = image[2, :, :, :]
     # display_image(single_image)
 
     return dataloader

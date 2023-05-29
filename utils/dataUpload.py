@@ -53,5 +53,32 @@ def upload_cameylon_parallelized():
     with Pool(processes=cpu_count()) as pool:
         pool.map(upload_blob, blobs)
 
+import subprocess
+
+def download_files_from_vm():
+    df = pd.read_csv("data/fmow_v1.1/debug/debug_train.csv")
+    filenames = list(df["new_filename"])
+    print("filenames: ", filenames)
+    vm_ip = '10.132.0.2'
+    vm_username = 'mvalentinastratta'
+    local_directory = 'data/fmow_v1.1/debug'
+    PATH_TO_PRIVATE_KEY = "~/.ssh/mvs_keys"
+
+    for filename in filenames:
+        local_path = f"{local_directory}/{filename}"
+        #scp_command = f"scp {vm_username}@{vm_ip}:{filename} {local_path} --ssh-key-file {PATH_TO_PRIVATE_KEY}"
+        scp_command = f"scp -i {PATH_TO_PRIVATE_KEY} {vm_username}@{vm_ip}:{filename} {local_path}"
+
+        
+        # Execute the scp command
+        process = subprocess.Popen(scp_command, shell=True)
+        process.wait()
+        
+        if process.returncode == 0:
+            print(f"Successfully downloaded {filename} to {local_path}")
+        else:
+            print(f"Failed to download {filename}")
+
+
 if __name__ == "__main__":
     fire.Fire()

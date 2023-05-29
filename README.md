@@ -7,6 +7,10 @@ Create celebA dataset splits:
 View stats on each celebA dataset split:
 ```python get_split_info.py```
 
+## Steps to train vanilla ResNet (FMoW)
+Using the debug dataset, run:
+```python main.py launch_training --config_filename="config_fmow.yaml" --data_dir="data/fmow_v1.1/debug" --experiment_name="experiments/fmow/vanilla_ResNet_debug" --train_metadata="debug_train_micro.csv" --val_metadata="debug_train_micro.csv"```
+
 ## Steps to train vanilla ResNet (CelebA)
 Using the debug dataset, run:
 ```python main.py launch_training --config_filename="config_celebA.yaml" --data_dir="data/CelebA" --experiment_name="experiments/CelebA/vanilla_ResNet_debug" --train_metadata="splits/debug_setting1_train.csv" --val_metadata="splits/debug_setting1_val.csv"```

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-from data.data_loader import get_camelyon_data_loader, get_celeba_data_loader
+from data.data_loader import get_camelyon_data_loader, get_celeba_data_loader, get_fmow_data_loader
 import fire
 import multiprocessing
 import yaml
@@ -21,6 +21,51 @@ torch.manual_seed(13)
 num_cpus = multiprocessing.cpu_count()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("DEVICE: ", device)
+
+def train_multiclass(model, train_loader, criterion, optimizer, config):
+    model.train()
+    train_loss = 0
+    correct = 0
+    total = 0
+    for batch_idx, (inputs, targets, metadata) in enumerate(tqdm(train_loader)):
+        # intputs shape:  torch.Size([8, 3, 224, 224])
+        # target shape:  torch.Size([8, 1])
+        inputs, targets = inputs.to(device), targets.to(device) 
+        
+        optimizer.zero_grad()
+
+        # represents the probability that the input belongs to the positive class (i.e., class 1).
+        targets = targets.squeeze().long() # torch.Size([8])
+        outputs = model(inputs) # torch.Size([8, 62])
+
+        loss = criterion(outputs, targets) # float
+        
+        # L2 regularization
+        regularization_term = 0.0
+        if config["reg_lambda"] != 0:
+            for param in model.parameters():
+                regularization_term += torch.norm(param, 2)**2
+            regularization_term *= config["reg_lambda"]
+        loss += regularization_term
+
+        loss.backward()
+
+        optimizer.step()
+
+        train_loss += loss.item()
+
+        # Update training accuracy
+        #predicted = (outputs > 0.5).float()
+        #_, predicted = torch.max(outputs, 1) # tensor([16, 16, 16, 16, 16, 22, 16, 16])
+        predicted = torch.argmax(outputs, dim=1)
+        total += targets.size(0)
+        correct += (predicted == targets).sum().item()
+
+    # Calculate average training loss and accuracy
+    avg_train_loss = train_loss / len(train_loader) # divide by num batches
+    train_accuracy = 100. * correct / total
+
+    return train_accuracy, avg_train_loss
 
 def train(model, train_loader, criterion, optimizer, config):
     """
@@ -76,6 +121,48 @@ def train(model, train_loader, criterion, optimizer, config):
 
     return train_accuracy, avg_train_loss
 
+def test_multiclass(model, test_loader, criterion, save_to_file=False):
+    model.eval()
+    test_loss = 0
+    correct = 0
+    total = 0
+    predictions = []
+    with torch.no_grad():
+        for batch_idx, (inputs, targets, metadata) in enumerate(tqdm(test_loader)):
+            inputs, targets = inputs.to(device), targets.to(device)
+
+            outputs = model(inputs)
+            
+            targets = targets.squeeze().long()
+            loss = criterion(outputs, targets)
+            test_loss += loss.item()
+
+            # Update test accuracy
+            #predicted = (outputs > 0.5).float()
+            #_, predicted = torch.max(outputs, 1)
+            predicted = torch.argmax(outputs, dim=1)
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
+
+            if save_to_file:
+                for i in range(len(inputs)):
+                    prediction = {
+                        'img_filename': metadata['img_filename'][i],
+                        'prediction': int(predicted[i].item())
+                    }
+                    predictions.append(prediction)
+    
+    # Calculate average training loss and accuracy
+    avg_test_loss = test_loss / len(test_loader) # divide by num batches
+    test_accuracy = 100. * correct / total
+
+    if save_to_file:
+        # Write predictions to JSON file
+        with open(save_to_file, 'w') as json_file:
+            json.dump(predictions, json_file)
+
+    return test_accuracy, avg_test_loss
+
 def test(model, test_loader, criterion, save_to_file=False):
     model.eval()
     test_loss = 0
@@ -123,6 +210,7 @@ def get_model(config):
         print("model: ", model)
     else:
         print("Using pretrained model!")
+        assert config["resnet_size"] == 50
         # Use pretrained model
         model = models.resnet50(pretrained=True)
         # Modify the last fully connected layer for binary classification
@@ -151,27 +239,24 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
     # Get config / hyperparams
     with open(config_filename) as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-    print("ckpt_pth: ", ckpt_pth)
     if ckpt_pth is None:
         shutil.copy(config_filename, experiment_dir / config_filename)
     else:
         pth = config_filename.split("/")
         config_last_name = pth[-1]
-        print("config_last_name: ", config_last_name)
         shutil.copy(config_last_name, experiment_dir / config_last_name)
 
     # Initialize w&b logging
     wandb.init(
-        project="ttt-fairness",
+        project="domain-adaptation",
         config=config
     )
-    print("config upweighting", config["upweighting"])
 
     # Get data
     #train_loader = get_camelyon_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
     #val_loader = get_camelyon_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
-    train_loader = get_celeba_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
-    val_loader = get_celeba_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
+    train_loader = get_fmow_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
+    val_loader = get_fmow_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
     
     # Get model
     if ckpt_pth is None:
@@ -182,23 +267,38 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
     model = model.to(device)
 
     # Set up loss
-    criterion = nn.BCELoss()
+    if config["loss_criterion"] == "binary-cross-entropy":
+        criterion = nn.BCELoss()
+    elif config["loss_criterion"] == "cross-entropy":
+        criterion = nn.CrossEntropyLoss()
+    else:
+        raise Exception("Need to define loss criterion")
 
     # Set up optimizers
     optimizer = optim.SGD(model.parameters(), lr=config["learning_rate"], momentum=config["momentum"], weight_decay=float(config["weight_decay"]))
     #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["lr_scheduler_step_size"], gamma=config["lr_scheduler_gamma"])
 
+    train_fn, test_fn = None, None
+    if config["dataset_name"] == "fmow":
+        train_fn = train_multiclass
+        test_fn = test_multiclass
+    elif config["dataset_name"] == "CelebA" or config["dataset_name"] == "camelyon17":
+        train_fn = train
+        test_fn = test
+    else:
+        raise Exception("Invalid dataset name")
+
     for epoch in range(config["num_epochs"]):
         print("Epoch: ", epoch)
-        
+
         # Train
-        train_acc, train_loss = train(model, train_loader, criterion, optimizer, config)
+        train_acc, train_loss = train_fn(model, train_loader, criterion, optimizer, config)
         print(f"Epoch: {epoch}, Train loss: {train_loss}, Train accuracy: {train_acc}")
         
         #scheduler.step()
 
         # Eval 
-        valid_acc, valid_loss = test(model, val_loader, criterion)
+        valid_acc, valid_loss = test_fn(model, val_loader, criterion)
         print(f"Epoch: {epoch}, Validation loss: {valid_loss}, Validation accuracy: {valid_acc}")
         
         # https://wandb.ai/wandb/common-ml-errors/reports/How-to-Save-and-Load-Models-in-PyTorch--VmlldzozMjg0MTE
@@ -237,7 +337,8 @@ def eval_checkpoint(config_pth, exp_name, ckpt_path, data_dir, dataset_metadata)
     model = load_model_from_checkpoint(config_pth, ckpt_path)
     model = model.to(device)
 
-    loader = get_celeba_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
+    #loader = get_celeba_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
+    loader = get_fmow_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
 
     test_accuracy, avg_test_loss = test(model, loader, nn.BCELoss(), save_to_file=exp_dir / "predictions.json")
     

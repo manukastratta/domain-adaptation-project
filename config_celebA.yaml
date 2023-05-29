@@ -1,0 +1,23 @@
+# Model
+model: "vanilla_ResNet"
+pretrained: False
+freeze_layers: True
+# Custom model
+resnet_size: 50
+# Dataset
+dataset_name: "celebA"
+num_classes: 1
+batch_size: 32
+loader_normalized: False
+# Optimization
+num_epochs: 30
+learning_rate: 0.01
+momentum: 0.9
+weight_decay: 1e-4
+# Loss
+reg_lambda: 0 #0.001
+upweighting: False
+# ckpt_interval: 1
+# optim.lr_scheduler
+# lr_scheduler_step_size: 50
+# lr_scheduler_gamma: 0.1
