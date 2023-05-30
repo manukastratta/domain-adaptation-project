@@ -78,6 +78,8 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * self.expansion, num_classes)
 
+        self.return_features = False
+
     def forward(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
@@ -91,9 +93,13 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = x.reshape(x.shape[0], -1)
+        features = x # dim 512
         x = self.fc(x)
         x = self.sigmoid(x) # ADDED THIS HERE
-        return x
+        if not self.return_features:
+            return x
+        else:
+            return x, features
 
     def make_layers(self, num_layers, block, num_residual_blocks, intermediate_channels, stride):
         layers = []

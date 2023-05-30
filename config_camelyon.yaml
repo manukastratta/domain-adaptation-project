@@ -1,20 +1,22 @@
 # Model
 model: "vanilla_ResNet"
-pretrained: True
-freeze_layers: True
+pretrained: False
+freeze_layers: False
 # Custom model
-resnet_size: 50
+resnet_size: 18
 # Dataset
-dataset_name: "camelyon17_withValSplit" # camelyon17_debug
+dataset_name: "camelyon17"
 num_classes: 1
 batch_size: 32
 # Optimization
-num_epochs: 8
+loss_criterion: "binary-cross-entropy"
+num_epochs: 5
 learning_rate: 0.01
 momentum: 0.9
 weight_decay: 1e-4
 # Loss
 reg_lambda: 0 #0.001
+dann_trade_off: 1
 # ckpt_interval: 1
 # optim.lr_scheduler
 # lr_scheduler_step_size: 50

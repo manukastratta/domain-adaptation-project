@@ -1,7 +1,7 @@
 # Model
 model: "vanilla_ResNet"
-pretrained: False
-freeze_layers: True
+pretrained: True
+freeze_layers: False
 # Custom model
 resnet_size: 18
 # Dataset

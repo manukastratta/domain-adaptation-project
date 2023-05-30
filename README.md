@@ -14,6 +14,11 @@ Using the debug dataset, run:
 Using the main dataset, run:
 ```python main.py launch_training --config_filename="config_fmow.yaml" --data_dir="data/fmow_v1.1" --experiment_name="experiments/fmow/vanilla_ResNet" --train_metadata="train.csv" --val_metadata="val.csv" --val_id_metadata="id/id_val.csv"```
 
+# Steps to train DANN method (Camelyon)
+Using the debug dataset, run:
+```python dann.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/DANN_debug" --train_metadata="debug/train/metadata_debug_train.csv" --train_target_unlabeled_metadata="debug/train/temp_metadata_debug_target_train.csv" --val_metadata="debug/train/metadata_debug_val.csv"```
+
+
 ## Steps to train vanilla ResNet (CelebA)
 Using the debug dataset, run:
 ```python main.py launch_training --config_filename="config_celebA.yaml" --data_dir="data/CelebA" --experiment_name="experiments/CelebA/vanilla_ResNet_debug" --train_metadata="splits/debug_setting1_train.csv" --val_metadata="splits/debug_setting1_val.csv"```
