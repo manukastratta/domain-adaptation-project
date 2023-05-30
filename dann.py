@@ -6,7 +6,8 @@ from data.data_loader import get_camelyon_data_loader
 import fire
 import multiprocessing
 import yaml
-from torchvision.models import resnet18, ResNet18_Weights, resnet50, ResNet50_Weights
+#from torchvision.models import resnet18, ResNet18_Weights, resnet50, ResNet50_Weights
+from torchvision.models import resnet18, resnet50
 from pathlib import Path
 import wandb
 import os
@@ -141,9 +142,11 @@ def get_model(config):
     else:
         print("Using pretrained model!")
         if config["resnet_size"] == 50:
-            model = resnet50(weights=ResNet50_Weights.DEFAULT)
+            model = resnet50(pretrained=True)
+            #model = resnet50(weights=ResNet50_Weights.DEFAULT)
         elif config["resnet_size"] == 18:
-            model = resnet18(weights=ResNet18_Weights.DEFAULT)
+            model = resnet18(pretrained=True)
+            #model = resnet18(weights=ResNet18_Weights.DEFAULT)
         else:
             raise Exception("Invalid resnet_size in config.")
         
