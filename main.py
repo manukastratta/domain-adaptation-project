@@ -231,7 +231,7 @@ def get_model(config):
     return model
 
 
-def launch_training(config_filename, data_dir, experiment_name, train_metadata, val_metadata, ckpt_pth=None):
+def launch_training(config_filename, data_dir, experiment_name, train_metadata, val_metadata, val_id_metadata=None, ckpt_pth=None):
     experiment_dir = Path(experiment_name)
     if not os.path.exists(experiment_dir):
         os.makedirs(experiment_dir)
@@ -257,6 +257,8 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
     #val_loader = get_camelyon_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
     train_loader = get_fmow_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
     val_loader = get_fmow_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
+    if val_id_metadata:
+        val_id_loader = get_fmow_data_loader(data_dir, val_id_metadata, batch_size=config["batch_size"])
     
     # Get model
     if ckpt_pth is None:
@@ -300,6 +302,11 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
         # Eval 
         valid_acc, valid_loss = test_fn(model, val_loader, criterion)
         print(f"Epoch: {epoch}, Validation loss: {valid_loss}, Validation accuracy: {valid_acc}")
+
+        # Eval ID
+        if val_id_metadata:
+            valid_id_acc, valid_id_loss = test_fn(model, val_id_loader, criterion)
+            print(f"Epoch: {epoch}, Validation ID loss: {valid_id_loss}, Validation ID accuracy: {valid_id_acc}")
         
         # https://wandb.ai/wandb/common-ml-errors/reports/How-to-Save-and-Load-Models-in-PyTorch--VmlldzozMjg0MTE
         torch.save({'epoch': epoch,
@@ -316,6 +323,11 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
                    "validation/valid_loss": valid_loss,
                    "validation/valid_acc": valid_acc
                    })
+        if val_id_metadata:
+            wandb.log({
+                "validation_id/valid_id_loss": valid_id_loss,
+                "validation_id/valid_id_acc": valid_id_acc
+            })
 
 def load_model_from_checkpoint(config_pth, ckpt_path):
     with open(config_pth) as f:

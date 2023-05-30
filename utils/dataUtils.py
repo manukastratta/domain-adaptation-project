@@ -168,6 +168,17 @@ def create_debug_val_dataset():
     #df = df.reset_index()
     df.to_csv("/Users/manukastratta/Developer/CS329D/test-time-training-project/data/camelyon17_v1.0/debug/train/metadata_debug_val.csv", index=False)
 
+def create_temp_unlabeled_target_train_dataset():
+    filename = "data/camelyon17_v1.0/wilds_splits/metadata_test.csv"
+    df = pd.read_csv(filename)
+    subset = int(0.2 * len(df)) # 29,344
+    df = df.sample(n=subset)
+    df = df.drop(["tumor"], axis=1)
+    df = df.reset_index()
+    print(df)
+    df = df.to_csv("data/camelyon17_v1.0/wilds_splits/temp_metadata_target_train.csv")
+
+
 import numpy as np
 from PIL import Image
 
