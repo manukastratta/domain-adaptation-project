@@ -6,7 +6,7 @@ from data.data_loader import get_camelyon_data_loader, get_celeba_data_loader, g
 import fire
 import multiprocessing
 import yaml
-import torchvision.models as models
+from torchvision.models import resnet18, ResNet18_Weights, resnet50, ResNet50_Weights
 from pathlib import Path
 import wandb
 import os
@@ -209,10 +209,15 @@ def get_model(config):
         model = ResNet(config["resnet_size"], Block, image_channels=3, num_classes=config["num_classes"])
         print("model: ", model)
     else:
-        print("Using pretrained model!")
-        assert config["resnet_size"] == 50
         # Use pretrained model
-        model = models.resnet50(pretrained=True)
+        print("Using pretrained model!")
+        if config["resnet_size"] == 50:
+            model = resnet50(weights=ResNet50_Weights.DEFAULT)
+        elif config["resnet_size"] == 18:
+            model = resnet18(weights=ResNet18_Weights.DEFAULT)
+        else:
+            raise Exception("Invalid resnet_size in config.")
+        
         # Modify the last fully connected layer for binary classification
         num_features = model.fc.in_features
         model.fc = nn.Sequential(
