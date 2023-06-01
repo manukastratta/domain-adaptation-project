@@ -51,7 +51,7 @@ def celebA_clean_cols():
     df.to_csv(meta_filename, index=False)
 
 def add_image_path():
-    meta_filename = "data/camelyon17_v1.0/metadata.csv"
+    meta_filename = "data/camelyon17_v1.0/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv"
     df = pd.read_csv(meta_filename)
 
     def get_image_path(row):
@@ -65,7 +65,7 @@ def add_image_path():
         
     df["image_path"] = df.apply(get_image_path, axis=1)
     print(df)
-    df.to_csv("data/camelyon17_v1.0/metadata_with_filenames.csv", index=False)
+    df.to_csv("data/camelyon17_v1.0/camelyon17_unlabeled_v1.0/unlabeled_hospital4_filenames.csv", index=False)
 
 def unlabeled_splits():
     meta_filename = "data/camelyon17_v1.0/camelyon17_unlabeled_v1.0/metadata.csv"
