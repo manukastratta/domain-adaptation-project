@@ -20,9 +20,7 @@ from models.domain_adversarial_loss import DomainAdversarialLoss
 from models.ttlib_iterators import ForeverDataIterator
 from utils.ttlib_utils import accuracy, binary_accuracy, AverageMeter
 import torch.nn.functional as F
-
-np.random.seed(13)
-torch.manual_seed(13) 
+import random
 
 num_cpus = multiprocessing.cpu_count()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -168,6 +166,17 @@ def get_model(config):
 
     return model
 
+def set_seed(seed):
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    # When running on the CuDNN backend, two further options must be set
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    # Set a fixed value for the hash seed
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    print(f"Random seed set as {seed}")
 
 def launch_training(config_filename, data_dir, experiment_name, train_metadata, train_target_unlabeled_metadata, val_metadata, ckpt_pth=None):
     experiment_dir = Path(experiment_name)
@@ -183,6 +192,9 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
         pth = config_filename.split("/")
         config_last_name = pth[-1]
         shutil.copy(config_last_name, experiment_dir / config_last_name)
+
+    # Set seeds
+    set_seed(config["seed"])
 
     # Initialize w&b logging
     wandb.init(
