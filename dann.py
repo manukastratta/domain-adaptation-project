@@ -178,7 +178,7 @@ def set_seed(seed):
     os.environ["PYTHONHASHSEED"] = str(seed)
     print(f"Random seed set as {seed}")
 
-def launch_training(config_filename, data_dir, experiment_name, train_metadata, train_target_unlabeled_metadata, val_metadata, ckpt_pth=None):
+def launch_training(config_filename, data_dir, experiment_name, train_metadata, val_metadata, data_unlabeled_dir, train_target_unlabeled_metadata, ckpt_pth=None):
     experiment_dir = Path(experiment_name)
     if not os.path.exists(experiment_dir):
         os.makedirs(experiment_dir)
@@ -204,7 +204,7 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
 
     # Get data
     train_source_loader = get_camelyon_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
-    train_target_loader = get_camelyon_data_loader(data_dir, train_target_unlabeled_metadata, batch_size=config["batch_size"])
+    train_target_loader = get_camelyon_data_loader(data_unlabeled_dir, train_target_unlabeled_metadata, batch_size=config["batch_size"])
     val_loader = get_camelyon_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
     
     # Forever iterators
