@@ -70,10 +70,7 @@ class DomainAdversarialLoss(nn.Module):
         d = self.domain_discriminator(f)
         if self.sigmoid:
             #d_s, d_t = d.chunk(2, dim=0)
-            print("d.shape: ", d.shape)
             d_s, d_t = d[0:n_examples, :], d[n_examples:, :]
-            print("d_s.shape: ", d_s.shape)
-            print("d_t.shape: ", d_t.shape)
             d_label_s = torch.ones((f_s.size(0), 1)).to(f_s.device)
             d_label_t = torch.zeros((f_t.size(0), 1)).to(f_t.device)
             self.domain_discriminator_accuracy = 0.5 * (

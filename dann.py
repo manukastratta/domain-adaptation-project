@@ -57,7 +57,6 @@ def train(model, domain_adv, train_source_loader, train_target_iter, criterion, 
                 n_examples = len(x_s)
                 x_t = x_t[:n_examples, :]
         assert len(x_s) == len(x_t) == len(labels_s) == n_examples
-        print("n_examples: ", n_examples)
 
         x_s = x_s.to(device)
         x_t = x_t.to(device)
@@ -158,7 +157,6 @@ def get_model(config):
         
         # Modify the last fully connected layer for binary classification
         num_features = model.fc.in_features
-        print("HEY num_features: ", num_features)
         model.fc = nn.Sequential(
             nn.Linear(num_features, config["num_classes"]),
             nn.Sigmoid()
