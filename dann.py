@@ -48,8 +48,16 @@ def train(model, domain_adv, train_source_loader, train_target_iter, criterion, 
         #x_s, labels_s = next(train_source_iter)[:2]
         x_t, = next(train_target_iter)[:1]
         # truncate x_t to fit size of n_examples
-        if len(x_t) > n_examples:
-            x_t = x_t[:n_examples, :]
+        if len(x_t) != len(x_s):
+            if len(x_s) > len(x_t):
+                n_examples = len(x_t)
+                x_s = x_s[:n_examples, :]
+                labels_s = labels_s[:n_examples, :]
+            elif len(x_s) < len(x_t):
+                n_examples = len(x_s)
+                x_t = x_t[:n_examples, :]
+        assert len(x_s) == len(x_t) == len(labels_s) == n_examples
+        print("n_examples: ", n_examples)
 
         x_s = x_s.to(device)
         x_t = x_t.to(device)
@@ -58,11 +66,11 @@ def train(model, domain_adv, train_source_loader, train_target_iter, criterion, 
         # compute output
         x = torch.cat((x_s, x_t), dim=0)
         y, f = model(x) #torch.Size([64, 1]), torch.Size([64, 512])
-        y_s, y_t = y[0:len(labels_s), :], y[len(labels_s):, :]
-        f_s, f_t = f[0:len(labels_s), :], f[len(labels_s):, :]
+        y_s, y_t = y[0:n_examples, :], y[n_examples:, :]
+        f_s, f_t = f[0:n_examples, :], f[n_examples:, :]
 
         cls_loss = F.binary_cross_entropy(y_s, labels_s)
-        transfer_loss = domain_adv(f_s, f_t)
+        transfer_loss = domain_adv(f_s, f_t, n_examples)
         domain_acc = domain_adv.domain_discriminator_accuracy
         domain_accs.update(domain_acc.item(), x_s.size(0))
 

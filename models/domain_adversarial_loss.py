@@ -64,12 +64,16 @@ class DomainAdversarialLoss(nn.Module):
             F.binary_cross_entropy(input, target, weight=weight, reduction=reduction)
         self.domain_discriminator_accuracy = None
 
-    def forward(self, f_s: torch.Tensor, f_t: torch.Tensor,
+    def forward(self, f_s: torch.Tensor, f_t: torch.Tensor, n_examples: int,
                 w_s: Optional[torch.Tensor] = None, w_t: Optional[torch.Tensor] = None) -> torch.Tensor:
         f = self.grl(torch.cat((f_s, f_t), dim=0))
         d = self.domain_discriminator(f)
         if self.sigmoid:
-            d_s, d_t = d.chunk(2, dim=0)
+            #d_s, d_t = d.chunk(2, dim=0)
+            print("d.shape: ", d.shape)
+            d_s, d_t = d[0:n_examples, :], d[n_examples:, :]
+            print("d_s.shape: ", d_s.shape)
+            print("d_t.shape: ", d_t.shape)
             d_label_s = torch.ones((f_s.size(0), 1)).to(f_s.device)
             d_label_t = torch.zeros((f_t.size(0), 1)).to(f_t.device)
             self.domain_discriminator_accuracy = 0.5 * (
