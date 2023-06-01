@@ -67,8 +67,12 @@ def add_image_path():
     print(df)
     df.to_csv("data/camelyon17_v1.0/metadata_with_filenames.csv", index=False)
 
-    
-
+def unlabeled_splits():
+    meta_filename = "data/camelyon17_v1.0/camelyon17_unlabeled_v1.0/metadata.csv"
+    df = pd.read_csv(meta_filename)
+    hospital4 = df.loc[df["center"]==4]
+    print(hospital4)
+    hospital4.to_csv("data/camelyon17_v1.0/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv", index=False)    
 
 def data_stats():
     meta_filename = "data/camelyon17_v1.0/metadata.csv"
@@ -173,10 +177,10 @@ def create_temp_unlabeled_target_train_dataset():
     df = pd.read_csv(filename)
     subset = int(0.2 * len(df)) # 29,344
     df = df.sample(n=subset)
-    df = df.drop(["tumor"], axis=1)
+    #df = df.drop(["tumor"], axis=1)
     df = df.reset_index()
     print(df)
-    df = df.to_csv("data/camelyon17_v1.0/wilds_splits/temp_metadata_target_train.csv")
+    df = df.to_csv("data/camelyon17_v1.0/wilds_splits/temp_metadata_target_unlabeled.csv")
 
 
 import numpy as np

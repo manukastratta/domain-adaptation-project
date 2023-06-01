@@ -18,6 +18,8 @@ Using the main dataset, run:
 Using the debug dataset, run:
 ```python dann.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/DANN_debug" --train_metadata="debug/train/metadata_debug_train.csv" --train_target_unlabeled_metadata="debug/train/temp_metadata_debug_target_train.csv" --val_metadata="debug/train/metadata_debug_val.csv"```
 
+Using the main dataset, run:
+```python dann.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/camelyon/DANN_tradeoff1" --train_metadata="wilds_splits/metadata_train.csv" --train_target_unlabeled_metadata="wilds_splits/temp_metadata_target_unlabeled.csv" --val_metadata="wilds_splits/metadata_val.csv"```
 
 ## Steps to train vanilla ResNet (CelebA)
 Using the debug dataset, run:
