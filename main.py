@@ -6,7 +6,8 @@ from data.data_loader import get_camelyon_data_loader, get_celeba_data_loader, g
 import fire
 import multiprocessing
 import yaml
-from torchvision.models import resnet18, ResNet18_Weights, resnet50, ResNet50_Weights
+#from torchvision.models import resnet18, ResNet18_Weights, resnet50, ResNet50_Weights
+from torchvision.models import resnet18, resnet50
 from pathlib import Path
 import wandb
 import os
@@ -357,19 +358,23 @@ def load_model_from_checkpoint(config_pth, ckpt_path):
     print("train acc at checkpoint: ", checkpoint["train_acc"])
     return model
 
-def eval_checkpoint(config_pth, exp_name, ckpt_path, data_dir, dataset_metadata):
-    exp_dir = Path("experiments") / exp_name
+def eval_checkpoint(config_name, exp_dir, ckpt_name, data_dir, dataset_metadata):
+    exp_dir = Path(exp_dir)
+    config_pth = exp_dir / config_name
+    ckpt_pth = exp_dir / ckpt_name
     
     with open(config_pth) as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    model = load_model_from_checkpoint(config_pth, ckpt_path)
+    model = load_model_from_checkpoint(config_pth, ckpt_pth)
     model = model.to(device)
 
-    #loader = get_celeba_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
-    loader = get_fmow_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
+    loader = get_celeba_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
 
-    test_accuracy, avg_test_loss = test(model, loader, nn.BCELoss(), save_to_file=exp_dir / "predictions.json")
+    import datetime
+    date_string = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    predictions_filename = f"predictions_{date_string}.json"
+    test_accuracy, avg_test_loss = test(model, loader, nn.BCELoss(), save_to_file=exp_dir / predictions_filename)
     
     print("test_accuracy: ", test_accuracy)
     print("avg_test_loss: ", avg_test_loss)
