@@ -18,18 +18,11 @@ Using the main dataset, run:
 Using the debug dataset, run:
 ```python dann.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/DANN_debug" --train_metadata="debug/train/metadata_debug_train.csv" --train_target_unlabeled_metadata="debug/train/temp_metadata_debug_target_train.csv" --val_metadata="debug/train/metadata_debug_val.csv"```
 
-Using the main dataset, run:
+[temp] Using the main dataset, run:
 ```python dann.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/camelyon/DANN_tradeoff1" --train_metadata="wilds_splits/metadata_train.csv" --train_target_unlabeled_metadata="wilds_splits/temp_metadata_target_unlabeled.csv" --val_metadata="wilds_splits/metadata_val.csv"```
 
-## Steps to train vanilla ResNet (CelebA)
-Using the debug dataset, run:
-```python main.py launch_training --config_filename="config_celebA.yaml" --data_dir="data/CelebA" --experiment_name="experiments/CelebA/vanilla_ResNet_debug" --train_metadata="splits/debug_setting1_train.csv" --val_metadata="splits/debug_setting1_val.csv"```
-
 Using the main dataset, run:
-```python main.py launch_training --config_filename="config_celebA.yaml" --data_dir="data/CelebA" --experiment_name="experiments/CelebA/vanilla_ResNet_scratch_18" --train_metadata="splits/setting1_train.csv" --val_metadata="splits/setting1_val.csv"```
-
-To resume training from checkpoint, add extra ckpt_pth and change config_filename to be the (relative) path to the config you want to restart from:
-```python main.py launch_training --config_filename="experiments/CelebA/vanilla_ResNet_debug/config_celebA.yaml" --data_dir="data/CelebA" --experiment_name="experiments/CelebA/vanilla_ResNet_debug_resumedEpoch5" --train_metadata="splits/debug_setting1_train.csv" --val_metadata="splits/debug_setting1_val.csv" --ckpt_pth="experiments/CelebA/vanilla_ResNet_debug/epoch5_model.pth"```
+```python dann.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/camelyon/DANN" --train_metadata="wilds_splits/metadata_train.csv" --val_metadata="wilds_splits/metadata_val.csv" --data_unlabeled_dir="data/camelyon17_unlabeled_v1.0" --train_target_unlabeled_metadata="unlabeled_hospital4.csv"```
 
 ## Steps to train vanilla ResNet (CAMELYON17)
 Using the debug dataset, run:
@@ -45,7 +38,7 @@ Using the main dataset (old splits), run:
 ## Evaluation
 To evaluate model at an epoch and save predictions to a json file:
 [Debug example]
-```python main.py eval_checkpoint --config_pth="experiments/CelebA/vanilla_ResNet_debug/config_celebA.yaml" --exp_name="CelebA/vanilla_ResNet_debug" --ckpt_path="experiments/CelebA/vanilla_ResNet_debug/epoch5_model.pth" --data_dir="data/CelebA" --dataset_metadata="splits/debug_setting1_train.csv"```
+```python main.py eval_checkpoint --config_name=config_camelyon.yaml --exp_dir=experiments/camelyon/DANN_v2 --ckpt_name=epoch2_model.pth --data_dir=data/camelyon17_v1.0 --dataset_metadata=wilds_splits/metadata_test.csv```
 
 To evaluate model at an epoch:
 ```python main.py eval_checkpoint --exp_name="vanilla_ResNet_debug" --epoch=0 --dataset_metadata="debug/train/metadata_debug_train.csv"```
