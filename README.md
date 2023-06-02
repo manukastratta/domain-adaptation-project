@@ -38,7 +38,7 @@ Using the main dataset (old splits), run:
 ## Evaluation
 To evaluate model at an epoch and save predictions to a json file:
 [Debug example]
-```python main.py eval_checkpoint --config_name=config_camelyon.yaml --exp_dir=experiments/camelyon/DANN_v2 --ckpt_name=epoch2_model.pth --data_dir=data/camelyon17_v1.0 --dataset_metadata=wilds_splits/metadata_test.csv```
+```python main.py eval_checkpoint --config_name=config_camelyon.yaml --exp_dir=experiments/camelyon/DANN_debug --ckpt_name=epoch2_model.pth --data_dir=data/camelyon17_v1.0 --dataset_metadata=debug/test/metadata_debug_test.csv```
 
 To evaluate model at an epoch:
 ```python main.py eval_checkpoint --exp_name="vanilla_ResNet_debug" --epoch=0 --dataset_metadata="debug/train/metadata_debug_train.csv"```

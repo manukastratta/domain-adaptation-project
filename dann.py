@@ -121,7 +121,7 @@ def test(model, test_loader, criterion, save_to_file=False):
             if save_to_file:
                 for i in range(len(inputs)):
                     prediction = {
-                        'img_filename': metadata['img_filename'][i],
+                        'image_path': metadata['image_path'][i],
                         'prediction': int(predicted[i].item())
                     }
                     predictions.append(prediction)
