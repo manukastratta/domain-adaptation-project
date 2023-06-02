@@ -38,13 +38,17 @@ class Camelyon17Dataset(Dataset):
         image_tensor = to_tensor(image_np)
         image_tensor = image_tensor.reshape((self.n_channels, self.img_size, self.img_size)) # torch.Size([3, 96, 96])
 
-        metadata = self.metadata.iloc[idx][['patient', 'node', 'x_coord', 'y_coord', 'slide', 'center']] # ignore split?
-        metadata_tensor = torch.Tensor(metadata.values.astype(np.float32))
+        #metadata = self.metadata.iloc[idx][['patient', 'node', 'x_coord', 'y_coord', 'slide', 'center']] # ignore split?
+        #metadata_tensor = torch.Tensor(metadata.values.astype(np.float32))
+
+        image_path = self.metadata.iloc[idx][['image_path']].item()
+        center = self.metadata.iloc[idx][['center']].item()
+        metadata = dict({"image_path": image_path, "center": center})
 
         label = self.metadata.iloc[idx][['tumor']]
         label_tensor = torch.Tensor(label.values.astype(np.int32))
 
-        return image_tensor, label_tensor, metadata_tensor
+        return image_tensor, label_tensor, metadata
 
 class CelebADataset(Dataset):
     def __init__(self, metadata_file, image_dir, transform=None):
@@ -216,7 +220,7 @@ def get_fmow_data_loader(data_dir, metadata_filename, batch_size=32, transform=N
     transform = None # Experiments showed that no normalization is best
     dataset = FMoWDataset(metadata_file=metadata_filename, image_dir=data_dir, transform=transform)
     # TODO change back to shuffle True
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_cpus, persistent_workers=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_cpus, persistent_workers=True)
 
     # # Testing dataloader
     # sample = next(iter(dataloader))
