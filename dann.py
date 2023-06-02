@@ -184,7 +184,9 @@ def set_seed(seed):
     os.environ["PYTHONHASHSEED"] = str(seed)
     print(f"Random seed set as {seed}")
 
-def launch_training(config_filename, data_dir, experiment_name, train_metadata, val_metadata, data_unlabeled_dir, train_target_unlabeled_metadata, ckpt_pth=None):
+def launch_training(config_filename, data_dir, experiment_name,
+                    train_metadata, val_metadata, data_unlabeled_dir,
+                    train_target_unlabeled_metadata, test_metadata=None, ckpt_pth=None):
     experiment_dir = Path(experiment_name)
     if not os.path.exists(experiment_dir):
         os.makedirs(experiment_dir)
@@ -212,7 +214,9 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
     train_source_loader = get_camelyon_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
     train_target_loader = get_camelyon_data_loader(data_unlabeled_dir, train_target_unlabeled_metadata, batch_size=config["batch_size"])
     val_loader = get_camelyon_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
-    
+    if test_metadata:
+        test_loader = get_camelyon_data_loader(data_dir, test_metadata, batch_size=config["batch_size"])
+
     # Forever iterators
     #train_source_iter = ForeverDataIterator(train_source_loader, device=device)
     train_target_iter = ForeverDataIterator(train_target_loader, device=device)
@@ -272,8 +276,14 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
         # Eval 
         valid_acc, valid_loss = test_fn(model, val_loader, criterion)
         print(f"Epoch: {epoch}, Validation loss: {valid_loss}, Validation accuracy: {valid_acc}")
+
+        # Eval on test
+        test_acc, test_loss = -1, -1
+        if test_loader:
+            test_acc, test_loss = test_fn(model, test_loader, criterion)
+            print(f"Epoch: {epoch}, Test loss: {test_loss}, Test accuracy: {test_acc}")
         
-        # https://wandb.ai/wandb/common-ml-errors/reports/How-to-Save-and-Load-Models-in-PyTorch--VmlldzozMjg0MTE
+        # https://wandb.ai/wandb/common-ml-errors/reports/How-to-Save-and-Load-Modeqls-in-PyTorch--VmlldzozMjg0MTE
         torch.save({'epoch': epoch,
                     'model_state_dict': model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
@@ -282,7 +292,9 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
                     'domain_loss': domain_loss,
                     'domain_acc': domain_acc,
                     'valid_loss': valid_loss,
-                    'valid_acc': valid_acc}, 
+                    'valid_acc': valid_acc,
+                    'test_loss': test_loss,
+                    'test_acc': test_acc}, 
                     experiment_dir / f'epoch{epoch}_model.pth')
 
         wandb.log({ "train/train_loss": train_loss,
@@ -290,7 +302,9 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
                     "train/domain_loss": domain_loss,
                     "train/domain_acc": domain_acc,
                     "validation/valid_loss": valid_loss,
-                    "validation/valid_acc": valid_acc
+                    "validation/valid_acc": valid_acc,
+                    "test/test_loss": test_loss,
+                    "test/test_acc": test_acc
                    })
 
 def load_model_from_checkpoint(config_pth, ckpt_path):
