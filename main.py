@@ -368,9 +368,9 @@ def eval_checkpoint(config_name, exp_dir, ckpt_name, data_dir, dataset_metadata)
 
     model = load_model_from_checkpoint(config_pth, ckpt_pth)
     model = model.to(device)
-
-    loader = get_celeba_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
-
+    
+    loader = get_camelyon_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
+    
     import datetime
     date_string = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     predictions_filename = f"predictions_{date_string}.json"
