@@ -142,7 +142,11 @@ def display_image(tensor_img):
     plt.imshow(img_normalized)
     plt.show()
 
-def get_camelyon_data_loader(data_dir, metadata_filename, batch_size=32, transform=None, num_cpus=multiprocessing.cpu_count()):
+def get_camelyon_data_loader(   data_dir,
+                                metadata_filename,
+                                batch_size=32,
+                                transform=None,
+                                num_cpus=multiprocessing.cpu_count()):
     """
     Takes in the meta csv filename, returns dataloader
     Can be used for train, val, or test metadata

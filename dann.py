@@ -26,7 +26,7 @@ num_cpus = multiprocessing.cpu_count()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("DEVICE: ", device)
 
-def train(model, domain_adv, train_source_loader, train_target_iter, criterion, optimizer, config):
+def train(model, domain_adv, train_source_loader, train_target_iter, criterion, optimizer_classifier, optimizer_domain_discri, config):
     """
     Train for 1 epoch
     Returns the average train accuracy and average train loss (across all batches for this one epoch)
@@ -73,15 +73,18 @@ def train(model, domain_adv, train_source_loader, train_target_iter, criterion, 
         domain_acc = domain_adv.domain_discriminator_accuracy
         domain_accs.update(domain_acc.item(), x_s.size(0))
 
-        loss = cls_loss + transfer_loss * config["dann_trade_off"]
+        loss = cls_loss + transfer_loss * config["penalty_weight_DANN"]
 
         #cls_acc = accuracy(y_s, labels_s)[0]
 
         # compute gradient and do SGD step
-        optimizer.zero_grad()
+        optimizer_classifier.zero_grad()
+        optimizer_domain_discri.zero_grad()
+
         loss.backward()
-        optimizer.step()
-        #lr_scheduler.step()
+
+        optimizer_classifier.step()
+        optimizer_domain_discri.step()
 
 
         train_loss += loss.item()
@@ -245,13 +248,11 @@ def launch_training(config_filename, data_dir, experiment_name,
     domain_adv = DomainAdversarialLoss(domain_discri).to(device)
 
     # Set up optimizers
-    params = list( model.parameters()) + list(domain_discri.get_parameters()) # 63
+    optimizer_classifier = optim.SGD(model.parameters(), lr=config["learning_rate"], momentum=config["momentum"], weight_decay=float(config["weight_decay"]))
     # Exclude non-tensor params
-    params = [p for p in params if isinstance(p, torch.Tensor)] # 62
-    optimizer = optim.SGD(  params,
-                            lr=config["learning_rate"],
-                            momentum=config["momentum"],
-                            weight_decay=float(config["weight_decay"]))
+    optimizer_domain_discri = optim.SGD(domain_discri.get_parameters(), lr=config["learning_rate_disciminator_DANN"])
+    
+    
     #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["lr_scheduler_step_size"], gamma=config["lr_scheduler_gamma"])
 
     train_fn, test_fn = train, test
@@ -268,7 +269,7 @@ def launch_training(config_filename, data_dir, experiment_name,
         print("Epoch: ", epoch)
 
         # Train
-        train_acc, train_loss, domain_acc, domain_loss = train_fn(model, domain_adv, train_source_loader, train_target_iter, criterion, optimizer, config)
+        train_acc, train_loss, domain_acc, domain_loss = train_fn(model, domain_adv, train_source_loader, train_target_iter, criterion, optimizer_classifier, optimizer_domain_discri, config)
         print(f"Epoch: {epoch}, Train loss: {train_loss}, Train accuracy: {train_acc}, Domain loss: {domain_loss}, Domain accuracy: {domain_acc}")
         
         #scheduler.step()
@@ -286,7 +287,8 @@ def launch_training(config_filename, data_dir, experiment_name,
         # https://wandb.ai/wandb/common-ml-errors/reports/How-to-Save-and-Load-Modeqls-in-PyTorch--VmlldzozMjg0MTE
         torch.save({'epoch': epoch,
                     'model_state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
+                    'optimizer_classifier_state_dict': optimizer_classifier.state_dict(),
+                    'optimizer_domain_discri_state_dict': optimizer_domain_discri.state_dict(),
                     'train_loss': train_loss,
                     'train_acc': train_acc,
                     'domain_loss': domain_loss,

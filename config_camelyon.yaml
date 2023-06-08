@@ -1,3 +1,4 @@
+seed: 13
 # Model
 model: "vanilla_ResNet"
 pretrained: False
@@ -7,16 +8,17 @@ resnet_size: 18
 # Dataset
 dataset_name: "camelyon17"
 num_classes: 1
-batch_size: 32
+batch_size: 168                       # from Sagawa et al.
 # Optimization
 loss_criterion: "binary-cross-entropy"
-num_epochs: 5
-learning_rate: 0.01
+num_epochs: 25
+learning_rate: 0.0030693212138627936 # from Sagawa et al., for both featurizer and classifier
+learning_rate_disciminator_DANN: 0.001
 momentum: 0.9
 weight_decay: 1e-4
 # Loss
 reg_lambda: 0 #0.001
-dann_trade_off: 1
+penalty_weight_DANN: 0.1 # classification_loss + domain_classification_loss * self.penalty_weight
 # ckpt_interval: 1
 # optim.lr_scheduler
 # lr_scheduler_step_size: 50
