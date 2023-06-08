@@ -51,7 +51,5 @@ class DomainDiscriminator(nn.Sequential):
                 final_layer
             )
 
-    def get_parameters(self) -> List[Dict]:
-        return [{"params": self.parameters(), "lr": 1.}]
-
-
+    #def get_parameters(self) -> List[Dict]:
+        #return [{"params": self.parameters(), "lr": 1.}]

@@ -250,7 +250,7 @@ def launch_training(config_filename, data_dir, experiment_name,
     # Set up optimizers
     optimizer_classifier = optim.SGD(model.parameters(), lr=config["learning_rate"], momentum=config["momentum"], weight_decay=float(config["weight_decay"]))
     # Exclude non-tensor params
-    optimizer_domain_discri = optim.SGD(domain_discri.get_parameters(), lr=config["learning_rate_disciminator_DANN"])
+    optimizer_domain_discri = optim.SGD(domain_discri.parameters(), lr=config["learning_rate_disciminator_DANN"])
     
     
     #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["lr_scheduler_step_size"], gamma=config["lr_scheduler_gamma"])
