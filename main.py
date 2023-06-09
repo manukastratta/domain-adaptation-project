@@ -322,9 +322,10 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
         print(f"Epoch: {epoch}, Validation loss: {valid_loss}, Validation accuracy: {valid_acc}")
 
         # Eval ID
+        test_acc, test_loss = -1, -1
         if test_metadata:
             test_acc, test_loss = test_fn(model, test_loader, criterion)
-            print(f"Epoch: {epoch}, Validation ID loss: {test_loss}, Validation ID accuracy: {test_acc}")
+            print(f"Epoch: {epoch}, Test loss: {test_loss}, Test accuracy: {test_acc}")
         
         # https://wandb.ai/wandb/common-ml-errors/reports/How-to-Save-and-Load-Models-in-PyTorch--VmlldzozMjg0MTE
         torch.save({'epoch': epoch,
@@ -336,16 +337,13 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
                     'valid_acc': valid_acc}, 
                     experiment_dir / f'epoch{epoch}_model.pth')
 
-        wandb.log({"train/train_loss": train_loss,
-                   "train/train_acc": train_acc,
-                   "validation/valid_loss": valid_loss,
-                   "validation/valid_acc": valid_acc
+        wandb.log({ "train/train_loss": train_loss,
+                    "train/train_acc": train_acc,
+                    "validation/valid_loss": valid_loss,
+                    "validation/valid_acc": valid_acc,
+                    "test/test_loss": test_loss,
+                    "test/test_acc": test_acc
                    })
-        if test_metadata:
-            wandb.log({
-                "test/test_loss": test_loss,
-                "test/test_acc": test_acc
-            })
 
 def load_model_from_checkpoint(config_pth, ckpt_path):
     with open(config_pth) as f:

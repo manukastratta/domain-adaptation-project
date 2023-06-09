@@ -8,11 +8,13 @@ import os
 import numpy as np
 from torchvision.transforms.functional import to_tensor
 from torchvision.transforms.functional import to_pil_image
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import colortrans
-from random import randint
+from torch.multiprocessing import set_start_method
 
 import multiprocessing
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class Camelyon17Dataset(Dataset):
     def __init__(self, metadata_file, image_dir, transform=None):
@@ -155,18 +157,20 @@ def display_image(tensor_img):
 class LinearHistogramMatching(object):
     def __init__(self):
         # images from unlabeled test set to pick from
-        img_names = set(pd.read_csv("data/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv")["image_path"])
-        self.img_paths = ["data/camelyon17_unlabeled_v1.0/" + img_name for img_name in img_names]
+        #dataset = "data/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv"
+        # img_names = set(pd.read_csv(dataset)["image_path"])
+        # self.img_paths = ["data/camelyon17_unlabeled_v1.0/" + img_name for img_name in img_names]
 
+        # Use test data (treat as unlabeled)
+        dataset = "data/camelyon17_v1.0/wilds_splits/metadata_test.csv"
+        img_names = set(pd.read_csv(dataset)["image_path"])
+        self.img_paths = ["data/camelyon17_v1.0/" + img_name for img_name in img_names]
+        
     def __call__(self, img):
         # randomly pick reference image from unlabeled test (hospital 4)
-        idx = randint(0, len(self.img_paths)-1)
-        img_path = self.img_paths[idx]
-        reference = np.array(Image.open(img_path).convert('RGB'))
-
-        img_np = np.array(img) # to numpy
-        x = colortrans.transfer_lhm(img_np, reference) # x.shape:  (96, 96, 3)
-        x = Image.fromarray(x) # to PIL again, x:  <PIL.Image.Image image mode=RGB size=96x96 at 0x7FAA10474100>
+        ref_img_path = np.random.choice(self.img_paths)
+        reference = np.array(Image.open(ref_img_path).convert('RGB'))
+        x = colortrans.transfer_lhm(np.array(img), reference) # x.shape:  (96, 96, 3)
         return x
 
 def get_camelyon_data_loader(   data_dir,
