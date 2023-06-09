@@ -213,19 +213,36 @@ def get_camelyon_data_loader(   data_dir,
     mean = [0.720475767490196, 0.5598634109803922, 0.7148540939215686]
     std = [0.1343516303921569, 0.1533899574509804, 0.11058405729411765]
 
-    if config["target_color_augmentations"] == "LHM":
-        print("Applying LHM target_color_augmentations!")
+    if config["data_augmentation"] == "LHM":
+        print("Applying LHM data_augmentation!")
         transform = transforms.Compose([
                 transforms.Resize(96), #(96, 96)
                 LinearHistogramMatching(),
                 transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
                 #transforms.Normalize(mean, std)
         ])
-    elif config["target_color_augmentations"] == "PCCM":
-        print("Applying PCCM target_color_augmentations!")
+    elif config["data_augmentation"] == "PCCM":
+        print("Applying PCCM data_augmentation!")
         transform = transforms.Compose([
                 transforms.Resize(96), #(96, 96)
                 PrincipalComponentsColorMatching(),
+                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+                #transforms.Normalize(mean, std)
+        ])
+    elif config["data_augmentation"] == "color_jitter":
+        print("Applying color jitter data_augmentation!")
+        transform = transforms.Compose([
+                transforms.Resize(96), #(96, 96)
+                transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+                #transforms.Normalize(mean, std)
+        ])
+    elif config["data_augmentation"] == "flips_rotations":
+        print("Applying random flips and rotations as data_augmentation!")
+        transform = transforms.Compose([
+                transforms.Resize(96), #(96, 96)
+                transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+                transforms.RandomRotation(degrees=90),  # Specify the maximum rotation angle
                 transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
                 #transforms.Normalize(mean, std)
         ])
