@@ -173,6 +173,25 @@ class LinearHistogramMatching(object):
         x = colortrans.transfer_lhm(np.array(img), reference) # x.shape:  (96, 96, 3)
         return x
 
+class PrincipalComponentsColorMatching(object):
+    def __init__(self):
+        # images from unlabeled test set to pick from
+        #dataset = "data/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv"
+        # img_names = set(pd.read_csv(dataset)["image_path"])
+        # self.img_paths = ["data/camelyon17_unlabeled_v1.0/" + img_name for img_name in img_names]
+
+        # Use test data (treat as unlabeled)
+        dataset = "data/camelyon17_v1.0/wilds_splits/metadata_test.csv"
+        img_names = set(pd.read_csv(dataset)["image_path"])
+        self.img_paths = ["data/camelyon17_v1.0/" + img_name for img_name in img_names]
+        
+    def __call__(self, img):
+        # randomly pick reference image from unlabeled test (hospital 4)
+        ref_img_path = np.random.choice(self.img_paths)
+        reference = np.array(Image.open(ref_img_path).convert('RGB'))
+        x = colortrans.transfer_pccm(np.array(img), reference) # x.shape:  (96, 96, 3)
+        return x
+
 def get_camelyon_data_loader(   data_dir,
                                 metadata_filename,
                                 config,
@@ -194,11 +213,19 @@ def get_camelyon_data_loader(   data_dir,
     mean = [0.720475767490196, 0.5598634109803922, 0.7148540939215686]
     std = [0.1343516303921569, 0.1533899574509804, 0.11058405729411765]
 
-    if config["target_color_augmentations"]:
-        print("Applying target_color_augmentations!")
+    if config["target_color_augmentations"] == "LHM":
+        print("Applying LHM target_color_augmentations!")
         transform = transforms.Compose([
                 transforms.Resize(96), #(96, 96)
                 LinearHistogramMatching(),
+                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+                #transforms.Normalize(mean, std)
+        ])
+    elif config["target_color_augmentations"] == "PCCM":
+        print("Applying PCCM target_color_augmentations!")
+        transform = transforms.Compose([
+                transforms.Resize(96), #(96, 96)
+                PrincipalComponentsColorMatching(),
                 transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
                 #transforms.Normalize(mean, std)
         ])

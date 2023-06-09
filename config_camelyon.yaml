@@ -26,4 +26,4 @@ penalty_weight_DANN: 0.1 # classification_loss + domain_classification_loss * s
 # lr_scheduler_gamma: 0.1
 # Data augmentations
 normalization: False
-target_color_augmentations: False
+target_color_augmentations: "PCCM" #"LHM" or "PCCM"
