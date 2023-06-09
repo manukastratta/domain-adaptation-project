@@ -1,32 +1,29 @@
 # test-time-training-project
 
-## Data (CelebA)
+# Data
+## CelebA
 Create celebA dataset splits:
 ```python split_data.py```
 
 View stats on each celebA dataset split:
 ```python get_split_info.py```
 
-## Steps to train vanilla ResNet (FMoW)
-Using the debug dataset, run:
-```python main.py launch_training --config_filename="config_fmow.yaml" --data_dir="data/fmow_v1.1/debug" --experiment_name="experiments/fmow/vanilla_ResNet_debug" --train_metadata="debug_train_micro.csv" --val_metadata="debug_train_micro.csv" --val_id_metadata="debug_train_micro.csv"```
-
-Using the main dataset, run:
-```python main.py launch_training --config_filename="config_fmow.yaml" --data_dir="data/fmow_v1.1" --experiment_name="experiments/fmow/vanilla_ResNet" --train_metadata="train.csv" --val_metadata="val.csv" --val_id_metadata="id/id_val.csv"```
-
-# Steps to train DANN method (Camelyon)
-Using the debug dataset, run:
-```python dann.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/DANN_debug" --train_metadata="debug/debug_metadata_train.csv" --data_unlabeled_dir=data/camelyon17_unlabeled_v1.0 --train_target_unlabeled_metadata="debug/debug_metadata_target_unlabeled.csv" --val_metadata="debug/debug_metadata_val.csv" --test_metadata=debug/debug_metadata_test.csv```
-
-Using the main dataset, run:
-```python dann.py launch_training --config_filename=config_camelyon.yaml --data_dir=data/camelyon17_v1.0 --experiment_name=experiments/camelyon/DANN_new_hyperparams --train_metadata=wilds_splits/metadata_train.csv --val_metadata=wilds_splits/metadata_val.csv --data_unlabeled_dir=data/camelyon17_unlabeled_v1.0 --train_target_unlabeled_metadata=unlabeled_hospital4.csv```
-
+# Experiments / training
 ## Steps to train vanilla ResNet (CAMELYON17)
 Using the debug dataset, run:
 ```python main.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/vanilla_ResNet_debug" --train_metadata="debug/debug_metadata_train.csv" --val_metadata="debug/debug_metadata_val.csv" --test_metadata=debug/debug_metadata_test.csv```
 
 Using the main dataset (new splits), run:
-```python main.py launch_training --config_filename=config_camelyon.yaml --data_dir=data/camelyon17_v1.0 --experiment_name=experiments/camelyon/vanilla_Resnet_0608 --train_metadata=wilds_splits/metadata_train.csv --val_metadata=wilds_splits/metadata_val.csv --test_metadata=wilds_splits/metadata_test.csv```
+```python main.py launch_training --config_filename=config_camelyon.yaml --data_dir=data/camelyon17_v1.0 --experiment_name=experiments/camelyon/vanilla_Resnet_0609_seed2 --train_metadata=wilds_splits/metadata_train.csv --val_metadata=wilds_splits/metadata_val.csv --test_metadata=wilds_splits/metadata_test.csv```
+
+## Steps to train DANN method (CAMELYON17)
+Using the debug dataset, run:
+```python dann.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/DANN_debug" --train_metadata="debug/debug_metadata_train.csv" --data_unlabeled_dir=data/camelyon17_unlabeled_v1.0 --train_target_unlabeled_metadata="debug/debug_metadata_target_unlabeled.csv" --val_metadata="debug/debug_metadata_val.csv" --test_metadata=debug/debug_metadata_test.csv --test_metadata=wilds_splits/metadata_test.csv```
+
+Using the main dataset, run:
+```python dann.py launch_training --config_filename=config_camelyon.yaml --data_dir=data/camelyon17_v1.0 --experiment_name=experiments/camelyon/DANN_new_hyperparams --train_metadata=wilds_splits/metadata_train.csv --val_metadata=wilds_splits/metadata_val.csv --data_unlabeled_dir=data/camelyon17_unlabeled_v1.0 --train_target_unlabeled_metadata=unlabeled_hospital4.csv --test_metadata=wilds_splits/metadata_test.csv```
+
+CUDA_VISIBLE_DEVICES=4 python dann.py launch_training --config_filename=config_camelyon.yaml --data_dir=data/camelyon17_v1.0 --experiment_name=experiments/camelyon/DANN_seed2 --train_metadata=wilds_splits/metadata_train.csv --val_metadata=wilds_splits/metadata_val.csv --data_unlabeled_dir=data/camelyon17_unlabeled_v1.0 --train_target_unlabeled_metadata=unlabeled_hospital4.csv --test_metadata=wilds_splits/metadata_test.csv
 
 ## Evaluation
 To evaluate model at an epoch and save predictions to a json file:
@@ -50,3 +47,11 @@ To set up tmux:
 from wilds import get_dataset
 dataset = get_dataset(dataset=“camelyon17”, download=True)
 ```
+
+## Other datasets
+## Steps to train vanilla ResNet (FMoW)
+Using the debug dataset, run:
+```python main.py launch_training --config_filename="config_fmow.yaml" --data_dir="data/fmow_v1.1/debug" --experiment_name="experiments/fmow/vanilla_ResNet_debug" --train_metadata="debug_train_micro.csv" --val_metadata="debug_train_micro.csv" --val_id_metadata="debug_train_micro.csv"```
+
+Using the main dataset, run:
+```python main.py launch_training --config_filename="config_fmow.yaml" --data_dir="data/fmow_v1.1" --experiment_name="experiments/fmow/vanilla_ResNet" --train_metadata="train.csv" --val_metadata="val.csv" --val_id_metadata="id/id_val.csv"```
