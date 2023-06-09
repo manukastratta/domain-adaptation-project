@@ -246,7 +246,7 @@ def set_seed(seed):
     os.environ["PYTHONHASHSEED"] = str(seed)
     print(f"Random seed set as {seed}")
 
-def launch_training(config_filename, data_dir, experiment_name, train_metadata, val_metadata, val_id_metadata=None, ckpt_pth=None):
+def launch_training(config_filename, data_dir, experiment_name, train_metadata, val_metadata, test_metadata=None, ckpt_pth=None):
     experiment_dir = Path(experiment_name)
     if not os.path.exists(experiment_dir):
         os.makedirs(experiment_dir)
@@ -271,12 +271,12 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
     )
 
     # Get data
-    #train_loader = get_camelyon_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
-    #val_loader = get_camelyon_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
-    train_loader = get_fmow_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
-    val_loader = get_fmow_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
-    if val_id_metadata:
-        val_id_loader = get_fmow_data_loader(data_dir, val_id_metadata, batch_size=config["batch_size"])
+    train_loader = get_camelyon_data_loader(data_dir, train_metadata, config)
+    val_loader = get_camelyon_data_loader(data_dir, val_metadata, config)
+    #train_loader = get_fmow_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
+    #val_loader = get_fmow_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
+    if test_metadata:
+        test_loader = get_camelyon_data_loader(data_dir, test_metadata, config)
     
     # Get model
     if ckpt_pth is None:
@@ -322,9 +322,9 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
         print(f"Epoch: {epoch}, Validation loss: {valid_loss}, Validation accuracy: {valid_acc}")
 
         # Eval ID
-        if val_id_metadata:
-            valid_id_acc, valid_id_loss = test_fn(model, val_id_loader, criterion)
-            print(f"Epoch: {epoch}, Validation ID loss: {valid_id_loss}, Validation ID accuracy: {valid_id_acc}")
+        if test_metadata:
+            test_acc, test_loss = test_fn(model, test_loader, criterion)
+            print(f"Epoch: {epoch}, Validation ID loss: {test_loss}, Validation ID accuracy: {test_acc}")
         
         # https://wandb.ai/wandb/common-ml-errors/reports/How-to-Save-and-Load-Models-in-PyTorch--VmlldzozMjg0MTE
         torch.save({'epoch': epoch,
@@ -341,10 +341,10 @@ def launch_training(config_filename, data_dir, experiment_name, train_metadata, 
                    "validation/valid_loss": valid_loss,
                    "validation/valid_acc": valid_acc
                    })
-        if val_id_metadata:
+        if test_metadata:
             wandb.log({
-                "validation_id/valid_id_loss": valid_id_loss,
-                "validation_id/valid_id_acc": valid_id_acc
+                "test/test_loss": test_loss,
+                "test/test_acc": test_acc
             })
 
 def load_model_from_checkpoint(config_pth, ckpt_path):

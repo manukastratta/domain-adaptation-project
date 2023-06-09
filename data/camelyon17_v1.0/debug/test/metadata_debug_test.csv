@@ -1,5 +1,0 @@
-patient,node,x_coord,y_coord,tumor,slide,center,split,image_path
-96,0,34240,8608,1,48,4,test,patches/patient_096_node_0/patch_patient_096_node_0_x_34240_y_8608.png
-81,4,18656,13568,0,41,4,test,patches/patient_081_node_4/patch_patient_081_node_4_x_18656_y_13568.png
-51,2,10272,13760,0,28,2,test,patches/patient_051_node_2/patch_patient_051_node_2_x_10272_y_13760.png
-96,0,33088,5536,1,48,4,test,patches/patient_096_node_0/patch_patient_096_node_0_x_33088_y_5536.png

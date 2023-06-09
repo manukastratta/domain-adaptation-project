@@ -8,7 +8,9 @@ import os
 import numpy as np
 from torchvision.transforms.functional import to_tensor
 from torchvision.transforms.functional import to_pil_image
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import colortrans
+from random import randint
 
 import multiprocessing
 
@@ -137,14 +139,39 @@ class FMoWDataset(Dataset):
 #     plt.show()
 
 def display_image(tensor_img):
-    img_normalized = np.array(tensor_img)
-    img_normalized = img_normalized.transpose(1, 2, 0)
-    plt.imshow(img_normalized)
-    plt.show()
+    img = np.array(tensor_img)
+    print("img.shape: ", img.shape)
+    img = img.transpose(2, 1, 0)
+    #img = img.transpose(1, 2, 0)
+    print("img.shape: ", img.shape)
+    plt.imshow(img)
+
+    import datetime
+    date_string = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    filename = f"utils/colors/temp/img_{date_string}.png"
+    plt.savefig(filename)
+    #plt.show()
+
+class LinearHistogramMatching(object):
+    def __init__(self):
+        # images from unlabeled test set to pick from
+        img_names = set(pd.read_csv("data/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv")["image_path"])
+        self.img_paths = ["data/camelyon17_unlabeled_v1.0/" + img_name for img_name in img_names]
+
+    def __call__(self, img):
+        # randomly pick reference image from unlabeled test (hospital 4)
+        idx = randint(0, len(self.img_paths)-1)
+        img_path = self.img_paths[idx]
+        reference = np.array(Image.open(img_path).convert('RGB'))
+
+        img_np = np.array(img) # to numpy
+        x = colortrans.transfer_lhm(img_np, reference) # x.shape:  (96, 96, 3)
+        x = Image.fromarray(x) # to PIL again, x:  <PIL.Image.Image image mode=RGB size=96x96 at 0x7FAA10474100>
+        return x
 
 def get_camelyon_data_loader(   data_dir,
                                 metadata_filename,
-                                batch_size=32,
+                                config,
                                 transform=None,
                                 num_cpus=multiprocessing.cpu_count()):
     """
@@ -163,14 +190,32 @@ def get_camelyon_data_loader(   data_dir,
     mean = [0.720475767490196, 0.5598634109803922, 0.7148540939215686]
     std = [0.1343516303921569, 0.1533899574509804, 0.11058405729411765]
 
-    transform = transforms.Compose([
-        transforms.Resize(96), #(96, 96)
-        transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
-        transforms.Normalize(mean, std)
-    ])
+    if config["target_color_augmentations"]:
+        print("Applying target_color_augmentations!")
+        transform = transforms.Compose([
+                transforms.Resize(96), #(96, 96)
+                LinearHistogramMatching(),
+                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+                #transforms.Normalize(mean, std)
+        ])
+    else:
+        if config["normalization"]:
+            print("Normalizing")
+            transform = transforms.Compose([
+                    transforms.Resize(96), #(96, 96)
+                    transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+                    transforms.Normalize(mean, std)
+            ])
+        else:
+            print("Not normalizing")
+            transform = transforms.Compose([
+                transforms.Resize(96), #(96, 96)
+                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+            ])
+
 
     dataset = Camelyon17Dataset(metadata_file=metadata_filename, image_dir=data_dir, transform=transform)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_cpus, persistent_workers=True)
+    dataloader = DataLoader(dataset, batch_size=config["batch_size"], shuffle=True, num_workers=num_cpus, persistent_workers=True)
 
     # # Testing dataloader
     # sample = next(iter(dataloader))

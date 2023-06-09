@@ -280,7 +280,7 @@ def launch_training(config_filename, data_dir, experiment_name,
 
         # Eval on test
         test_acc, test_loss = -1, -1
-        if test_loader:
+        if test_metadata:
             test_acc, test_loss = test_fn(model, test_loader, criterion)
             print(f"Epoch: {epoch}, Test loss: {test_loss}, Test accuracy: {test_acc}")
         

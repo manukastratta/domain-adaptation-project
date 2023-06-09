@@ -166,11 +166,12 @@ def rename_split():
 
 
 def create_debug_val_dataset():
-    val = "/Users/manukastratta/Developer/CS329D/test-time-training-project/data/camelyon17_v1.0/train/metadata_val_split.csv"
+    val = "/home/mvalentinastratta/domain-adaptation-project/data/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv"
     df = pd.read_csv(val)
-    df = df.sample(n=20)
+    df = df.sample(n=40)
     #df = df.reset_index()
-    df.to_csv("/Users/manukastratta/Developer/CS329D/test-time-training-project/data/camelyon17_v1.0/debug/train/metadata_debug_val.csv", index=False)
+    df.to_csv("data/camelyon17_v1.0/debug/debug_metadata_target_unlabeled.csv", index=False)
+
 
 def create_temp_unlabeled_target_train_dataset():
     filename = "data/camelyon17_v1.0/wilds_splits/metadata_test.csv"

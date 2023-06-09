@@ -1,4 +1,4 @@
-# torch-scatter>=2.0.5
+torch-scatter==2.0.7
 # torch-geometric>=2.0.1
 # tensorboard
 torch==1.9.0
@@ -9,3 +9,4 @@ wandb
 tqdm
 pandas
 wilds
+transformers
