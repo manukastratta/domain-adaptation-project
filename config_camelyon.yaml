@@ -1,14 +1,18 @@
-seed: 13
+seed: 16
+
 # Model
 model: "vanilla_ResNet"
 pretrained: False
 freeze_layers: False
+
 # Custom model
 resnet_size: 18
+
 # Dataset
 dataset_name: "camelyon17"
 num_classes: 1
 batch_size: 168                       # from Sagawa et al.
+
 # Optimization
 loss_criterion: "binary-cross-entropy"
 num_epochs: 20
@@ -16,6 +20,7 @@ learning_rate: 0.0030693212138627936 # from Sagawa et al., for both featurizer a
 learning_rate_disciminator_DANN: 0.001
 momentum: 0.9
 weight_decay: 1e-4
+
 # Loss
 reg_lambda: 0 #0.001
 upweighting: False
@@ -24,6 +29,7 @@ penalty_weight_DANN: 0.1 # classification_loss + domain_classification_loss * s
 # optim.lr_scheduler
 # lr_scheduler_step_size: 50
 # lr_scheduler_gamma: 0.1
+
 # Data augmentations
 normalization: False
-target_color_augmentations: "PCCM" #"LHM" or "PCCM"
+data_augmentation: "color_jitter" #"LHM" or "PCCM" or "color_jitter" or "flips_rotations"
