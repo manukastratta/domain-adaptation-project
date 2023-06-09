@@ -214,11 +214,11 @@ def launch_training(config_filename, data_dir, experiment_name,
     )
 
     # Get data
-    train_source_loader = get_camelyon_data_loader(data_dir, train_metadata, batch_size=config["batch_size"])
-    train_target_loader = get_camelyon_data_loader(data_unlabeled_dir, train_target_unlabeled_metadata, batch_size=config["batch_size"])
-    val_loader = get_camelyon_data_loader(data_dir, val_metadata, batch_size=config["batch_size"])
+    train_source_loader = get_camelyon_data_loader(data_dir, train_metadata, config)
+    train_target_loader = get_camelyon_data_loader(data_unlabeled_dir, train_target_unlabeled_metadata, config)
+    val_loader = get_camelyon_data_loader(data_dir, val_metadata, config)
     if test_metadata:
-        test_loader = get_camelyon_data_loader(data_dir, test_metadata, batch_size=config["batch_size"])
+        test_loader = get_camelyon_data_loader(data_dir, test_metadata, config)
 
     # Forever iterators
     #train_source_iter = ForeverDataIterator(train_source_loader, device=device)
@@ -329,7 +329,7 @@ def eval_checkpoint(config_pth, exp_name, ckpt_path, data_dir, dataset_metadata)
     model = load_model_from_checkpoint(config_pth, ckpt_path)
     model = model.to(device)
 
-    loader = get_camelyon_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
+    loader = get_camelyon_data_loader(data_dir, dataset_metadata, config)
 
     test_accuracy, avg_test_loss = test(model, loader, nn.BCELoss(), save_to_file=exp_dir / "predictions.json")
     
