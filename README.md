@@ -1,11 +1,21 @@
 # Domain Adaptation Project (CS229)
 
+# Data
 ## CelebA Data
 Create celebA dataset splits:
 ```python split_data.py```
 
 View stats on each celebA dataset split:
 ```python get_split_info.py```
+
+## Camelyon17 Data
+Download data (do only once)
+1. `pip install wilds`
+2. Run: 
+```
+from wilds import get_dataset
+dataset = get_dataset(dataset=“camelyon17”, download=True)
+```
 
 # Experiments / training
 ## Steps to train vanilla ResNet (CAMELYON17)
@@ -37,19 +47,3 @@ Run `conda activate CS229`
 Create a new tmux session when running experments. 
 To set up tmux:
 `conda install -c conda-forge tmux`
-
-## Download data (do only once)
-1. `pip install wilds`
-2. 
-```
-from wilds import get_dataset
-dataset = get_dataset(dataset=“camelyon17”, download=True)
-```
-
-## Other datasets
-## Steps to train vanilla ResNet (FMoW)
-Using the debug dataset, run:
-```python main.py launch_training --config_filename="config_fmow.yaml" --data_dir="data/fmow_v1.1/debug" --experiment_name="experiments/fmow/vanilla_ResNet_debug" --train_metadata="debug_train_micro.csv" --val_metadata="debug_train_micro.csv" --val_id_metadata="debug_train_micro.csv"```
-
-Using the main dataset, run:
-```python main.py launch_training --config_filename="config_fmow.yaml" --data_dir="data/fmow_v1.1" --experiment_name="experiments/fmow/vanilla_ResNet" --train_metadata="train.csv" --val_metadata="val.csv" --val_id_metadata="id/id_val.csv"```
