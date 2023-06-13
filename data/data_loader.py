@@ -176,11 +176,11 @@ class LinearHistogramMatching(object):
 class PrincipalComponentsColorMatching(object):
     def __init__(self):
         # images from unlabeled test set to pick from
-        #dataset = "data/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv"
+        # dataset = "data/camelyon17_unlabeled_v1.0/unlabeled_hospital4.csv"
         # img_names = set(pd.read_csv(dataset)["image_path"])
         # self.img_paths = ["data/camelyon17_unlabeled_v1.0/" + img_name for img_name in img_names]
 
-        # Use test data (treat as unlabeled)
+        # # Use test data (treat as unlabeled)
         dataset = "data/camelyon17_v1.0/wilds_splits/metadata_test.csv"
         img_names = set(pd.read_csv(dataset)["image_path"])
         self.img_paths = ["data/camelyon17_v1.0/" + img_name for img_name in img_names]
@@ -213,53 +213,59 @@ def get_camelyon_data_loader(   data_dir,
     mean = [0.720475767490196, 0.5598634109803922, 0.7148540939215686]
     std = [0.1343516303921569, 0.1533899574509804, 0.11058405729411765]
 
-    if config["data_augmentation"] == "LHM":
-        print("Applying LHM data_augmentation!")
-        transform = transforms.Compose([
-                transforms.Resize(96), #(96, 96)
-                LinearHistogramMatching(),
-                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
-                #transforms.Normalize(mean, std)
-        ])
-    elif config["data_augmentation"] == "PCCM":
-        print("Applying PCCM data_augmentation!")
-        transform = transforms.Compose([
-                transforms.Resize(96), #(96, 96)
-                PrincipalComponentsColorMatching(),
-                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
-                #transforms.Normalize(mean, std)
-        ])
-    elif config["data_augmentation"] == "color_jitter":
-        print("Applying color jitter data_augmentation!")
-        transform = transforms.Compose([
-                transforms.Resize(96), #(96, 96)
-                transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
-                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
-                #transforms.Normalize(mean, std)
-        ])
-    elif config["data_augmentation"] == "flips_rotations":
-        print("Applying random flips and rotations as data_augmentation!")
-        transform = transforms.Compose([
-                transforms.Resize(96), #(96, 96)
-                transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
-                transforms.RandomRotation(degrees=90),  # Specify the maximum rotation angle
-                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
-                #transforms.Normalize(mean, std)
-        ])
-    else:
-        if config["normalization"]:
-            print("Normalizing")
-            transform = transforms.Compose([
-                    transforms.Resize(96), #(96, 96)
-                    transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
-                    transforms.Normalize(mean, std)
-            ])
-        else:
-            print("Not normalizing")
-            transform = transforms.Compose([
-                transforms.Resize(96), #(96, 96)
-                transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
-            ])
+    # if config["data_augmentation"] == "LHM":
+    #     print("Applying LHM data_augmentation!")
+    #     transform = transforms.Compose([
+    #             transforms.Resize(96), #(96, 96)
+    #             LinearHistogramMatching(),
+    #             transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+    #             #transforms.Normalize(mean, std)
+    #     ])
+    # elif config["data_augmentation"] == "PCCM":
+    #     print("Applying PCCM data_augmentation!")
+    #     transform = transforms.Compose([
+    #             transforms.Resize(96), #(96, 96)
+    #             PrincipalComponentsColorMatching(),
+    #             transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+    #             #transforms.Normalize(mean, std)
+    #     ])
+    # elif config["data_augmentation"] == "color_jitter":
+    #     print("Applying color jitter data_augmentation!")
+    #     transform = transforms.Compose([
+    #             transforms.Resize(96), #(96, 96)
+    #             transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+    #             transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+    #             #transforms.Normalize(mean, std)
+    #     ])
+    # elif config["data_augmentation"] == "flips_rotations":
+    #     print("Applying random flips and rotations as data_augmentation!")
+    #     transform = transforms.Compose([
+    #             transforms.Resize(96), #(96, 96)
+    #             transforms.RandomHorizontalFlip(),  # Randomly flip the image horizontally
+    #             transforms.RandomRotation(degrees=90),  # Specify the maximum rotation angle
+    #             transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+    #             #transforms.Normalize(mean, std)
+    #     ])
+    # else:
+    #     if config["normalization"]:
+    #         print("Normalizing")
+    #         transform = transforms.Compose([
+    #                 transforms.Resize(96), #(96, 96)
+    #                 transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+    #                 transforms.Normalize(mean, std)
+    #         ])
+    #     else:
+    #         print("Not normalizing")
+    #         transform = transforms.Compose([
+    #             transforms.Resize(96), #(96, 96)
+    #             transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+    #         ])
+
+    # TODO remove
+    transform = transforms.Compose([
+        transforms.Resize(96), #(96, 96)
+        transforms.ToTensor(), # converts the PIL image with a pixel range of [0, 255] to a PyTorch FloatTensor of shape (C, H, W) with a range [0.0, 1.0]. 
+    ])
 
 
     dataset = Camelyon17Dataset(metadata_file=metadata_filename, image_dir=data_dir, transform=transform)

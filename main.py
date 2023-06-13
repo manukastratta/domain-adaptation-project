@@ -367,11 +367,12 @@ def eval_checkpoint(config_name, exp_dir, ckpt_name, data_dir, dataset_metadata)
     model = load_model_from_checkpoint(config_pth, ckpt_pth)
     model = model.to(device)
     
-    loader = get_camelyon_data_loader(data_dir, dataset_metadata, batch_size=config["batch_size"])
+    loader = get_camelyon_data_loader(data_dir, dataset_metadata, config)
     
     import datetime
     date_string = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-    predictions_filename = f"predictions_{date_string}.json"
+    #predictions_filename = f"predictions_{date_string}.json"
+    predictions_filename = "predictions.json"
     test_accuracy, avg_test_loss = test(model, loader, nn.BCELoss(), save_to_file=exp_dir / predictions_filename)
     
     print("test_accuracy: ", test_accuracy)

@@ -1,7 +1,7 @@
-seed: 16
+seed: 22 # 13, 16, 22, 27
 
 # Model
-model: "vanilla_ResNet"
+model: "vanilla_Resnet"
 pretrained: False
 freeze_layers: False
 
@@ -32,4 +32,4 @@ penalty_weight_DANN: 0.1 # classification_loss + domain_classification_loss * s
 
 # Data augmentations
 normalization: False
-data_augmentation: "color_jitter" #"LHM" or "PCCM" or "color_jitter" or "flips_rotations"
+data_augmentation: "LHM" #"LHM" or "PCCM" or "color_jitter" or "flips_rotations"
