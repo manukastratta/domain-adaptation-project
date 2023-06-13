@@ -1,9 +1,6 @@
-# test-time-training-project
+# Domain Adaptation Project (CS229)
 
-CUDA_VISIBLE_DEVICES=3 python main.py launch_training --config_filename=config_camelyon.yaml --data_dir=data/camelyon17_v1.0 --experiment_name=experiments/camelyon/LHM_unlabeled_test_seed3 --train_metadata=wilds_splits/metadata_train.csv --val_metadata=wilds_splits/metadata_val.csv --test_metadata=wilds_splits/metadata_test.csv
-
-# Data
-## CelebA
+## CelebA Data
 Create celebA dataset splits:
 ```python split_data.py```
 
@@ -15,7 +12,7 @@ View stats on each celebA dataset split:
 Using the debug dataset, run:
 ```python main.py launch_training --config_filename="config_camelyon.yaml" --data_dir="data/camelyon17_v1.0" --experiment_name="experiments/vanilla_ResNet_debug" --train_metadata="debug/debug_metadata_train.csv" --val_metadata="debug/debug_metadata_val.csv" --test_metadata=debug/debug_metadata_test.csv```
 
-Using the main dataset (new splits), run:
+Using the main dataset, run:
 ```python main.py launch_training --config_filename=config_camelyon.yaml --data_dir=data/camelyon17_v1.0 --experiment_name=experiments/camelyon/vanilla_Resnet_0609_seed2 --train_metadata=wilds_splits/metadata_train.csv --val_metadata=wilds_splits/metadata_val.csv --test_metadata=wilds_splits/metadata_test.csv```
 
 ## Steps to train DANN method (CAMELYON17)
@@ -27,7 +24,7 @@ Using the main dataset, run:
 
 ## Evaluation
 To evaluate model at an epoch and save predictions to a json file:
-[Debug example]
+Using the debug dataset, run:
 ```python main.py eval_checkpoint --config_name=config_camelyon.yaml --exp_dir=experiments/camelyon/DANN_debug --ckpt_name=epoch2_model.pth --data_dir=data/camelyon17_v1.0 --dataset_metadata=debug/test/metadata_debug_test.csv```
 
 To evaluate model at an epoch:
@@ -35,7 +32,7 @@ To evaluate model at an epoch:
 ```python main.py eval_checkpoint --config_name=config_camelyon.yaml --exp_dir=experiments/camelyon/DANN_new_hyperparams_seed4 --ckpt_name=epoch16_model.pth --data_dir=data/camelyon17_v1.0 --dataset_metadata=wilds_splits/metadata_test.csv``
 
 ## Environment set up
-Run `conda activate CS329D`
+Run `conda activate CS229`
 
 Create a new tmux session when running experments. 
 To set up tmux:
